@@ -1,7 +1,8 @@
 import numpy as np
+import inspect
 from numpy.random import default_rng
 from mesa.visualization.ModularVisualization import ModularServer
-from mesa.visualization.modules import ChartModule
+from mesa.visualization.modules import ChartModule, BarChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 
 from model import EconomiaSocialista
@@ -50,10 +51,16 @@ model_params = {
 
 print(model_params)
 
-chart = ChartModule([{"Label": "Gini",
-                      "Color": "#18496D"}],
+chartGini = ChartModule([{"Label": "Gini",
+                      "Color": "#18496D"},],
                     data_collector_name='datacollector')
 
-server = ModularServer(EconomiaSocialista, [chart], "Economia Socialista", model_params)
+chartGiniS80S20 = ChartModule([{"Label": "Gini",
+                      "Color": "#18496D"},
+                      {"Label": "S80/S20",
+                      "Color": "#A43DC6"}],
+                    data_collector_name='datacollector')
+
+server = ModularServer(EconomiaSocialista, [chartGini, chartGiniS80S20], "Economia Socialista", model_params)
 server.port = 8521 # The default
 server.launch()

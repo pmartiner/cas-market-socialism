@@ -6,7 +6,7 @@ from mesa import Agent, Model
 from mesa.datacollection import DataCollector
 
 from scheduler import RandomActivationByBreed
-from model_data_collection import compute_gini
+from model_data_collection import *
 
 
 class Consumidore(Agent):
@@ -58,7 +58,7 @@ class Consumidore(Agent):
             if self.oferta_trabajo_disponible > 0 and otre.demanda_trabajo_disponible > 0:
                 oferta = np.round(default_rng().uniform(0, self.oferta_trabajo_disponible), 2)
 
-            salario = default_rng().integers(self.model.costo_vida, 400) * oferta
+            salario = default_rng().integers(self.model.costo_vida, self.model.costo_vida + 300) * oferta
             self.oferta_trabajo_disponible -= oferta
             self.ingreso_disponible += salario
             self.ingreso_total += salario
@@ -108,13 +108,15 @@ class Empresa(Agent):
         rng = default_rng()
 
         # Dotaciones iniciales
-        self.demanda_trabajo = 0
+        self.demanda_trabajo_total = 0
+        self.demanda_trabajo_disponible = 0
         self.capital_inicial = np.round(rng.uniform(0, 5), 2)
-        self.costo_capital = np.ro
+        self.costo_capital = np.round(rng.uniform(0, 5), 2)
         self.beneficios_totales = 0
         self.produccion = 0
         self.max_beneficios = 0
-        self.costo_trabajo = 0
+        # Si me va mejor, subo salarios si no excede mis ingresos, es decir, que no se vuelven negativos mis beneficios estimados
+        self.costo_trabajo = np.round(rng.uniform(self.model.costo_vida, self.model.costo_vida + 300), 2)
         self.costo_capital = np.round(rng.uniform(0, 5), 2)
         self.alfa = np.round(rng.uniform(), 2)
         self.num_trabajadores = 0
@@ -125,7 +127,9 @@ class Empresa(Agent):
 
     def beneficios(self):
         # Normalizando los precios del bien a 1
-        self.beneficios_totales = self.func_prod(self.demanda_trabajo, self.capital_inicial, self.alfa) 
+        self.beneficios_totales = self.func_prod(self.demanda_trabajo_total, self.capital_inicial, self.alfa) - self.demanda_trabajo_total * self.costo_trabajo - self.capital_inicial * self.costo_capital
+
+    # Para calcular la demanda de trabajo, hago un rng.uniform(0, (costos_capital * capital_inicial - func_prod) / salario)
 
     def produce(self):
         self.beneficios()
@@ -134,7 +138,7 @@ class Empresa(Agent):
         self.model.schedule.remove(self)
 
     def step(self):
-        if self.beneficios < 0:
+        if self.beneficios_totales < 0:
             self.bancarrota()
         
         self.produce()
@@ -156,8 +160,11 @@ class EconomiaSocialista(Model):
             self.schedule.add(a)
         
         self.datacollector = DataCollector(
-            model_reporters={"Gini": compute_gini},  # `compute_gini` defined above
-            agent_reporters={"Ingreso total": "ingreso_total"}
+            model_reporters={
+                "Gini": compute_gini,
+                "S80/S20": compute_s80_s20
+            },  # `compute_gini` defined above
+            agent_reporters={"Ingreso total": lambda x: x.ingreso_total}
         )
 
     def entrada_mercado_laboral(self):

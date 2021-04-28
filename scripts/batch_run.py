@@ -4,20 +4,31 @@ from numpy.random import default_rng
 from mesa.batchrunner import BatchRunner
 
 from model import EconomiaSocialista
-from model_data_collection import compute_gini
+from model_data_collection import *
 
 rng = default_rng()
 
 fixed_params = {
     "J": 0,
+    "I": 300,
 }
 
 variable_params = {
-    "I": range(100, 1000, 100),
-    "impuesto_ingreso": np.round(rng.uniform(0, 1, 10), 2),
-    "costo_vida": rng.integers(0, 100, 10),
-    "ingreso_inicial": rng.integers(0, 100, 10)
+    "impuesto_ingreso": np.round(rng.uniform(0, 1, 5), 2),
+    "costo_vida": rng.integers(30, 500, 5),
+    "ingreso_inicial": rng.integers(0, 1000, 5)
 }
+
+model_reporters={
+   "Gini": compute_gini,
+   "S80/S20": compute_s80_s20
+}
+
+agent_reporters={
+    "Ingreso total": "ingreso_total"
+}
+
+print(variable_params)
 
 # The variables parameters will be invoke along with the fixed parameters allowing for either or both to be honored.
 # The BatchRunner won’t collect the data every step of the model, but only at the end of each run.
@@ -25,13 +36,71 @@ batch_run = BatchRunner(
     EconomiaSocialista,
     variable_params,
     fixed_params,
-    iterations=10,
-    max_steps=100,
-    model_reporters={"Gini": compute_gini}
+    iterations=5,
+    max_steps=70,
+    model_reporters=model_reporters,
+    agent_reporters=agent_reporters
 )
 
 batch_run.run_all()
 
-run_data = batch_run.get_model_vars_dataframe()
-run_data.head()
-plt.scatter(run_data.N, run_data.Gini)
+run_model_data = batch_run.get_model_vars_dataframe()
+run_model_data.head()
+print(run_model_data.head())
+# Gini
+plt.title('Coeficiente de Gini por iteración')
+plt.ylabel('Coeficiente de Gini')
+plt.xlabel('Iteración')
+plt.scatter(run_model_data.Run, run_model_data.Gini)
+plt.show()
+
+plt.title('Coeficiente de Gini ante cambios en el ingreso inicial')
+plt.ylabel('Coeficiente de Gini')
+plt.xlabel('Ingreso inicial')
+plt.scatter(run_model_data.ingreso_inicial, run_model_data.Gini)
+plt.show()
+
+plt.title('Coeficiente de Gini ante cambios en el costo de vida')
+plt.ylabel('Coeficiente de Gini')
+plt.xlabel('Costo de vida')
+plt.scatter(run_model_data.costo_vida, run_model_data.Gini)
+plt.show()
+
+plt.title('Coeficiente de Gini ante cambios en el impuesto al ingreso')
+plt.ylabel('Coeficiente de Gini')
+plt.xlabel('Impuesto al ingreso')
+plt.scatter(run_model_data.impuesto_ingreso, run_model_data.Gini)
+plt.show()
+
+# S80/S20
+plt.title('Índice S80/S20 por iteración')
+plt.ylabel('Índice S80/S20')
+plt.xlabel('Iteración')
+plt.scatter(run_model_data.Run, run_model_data["S80/S20"])
+plt.show()
+
+plt.title('Índice S80/S20 ante cambios en el ingreso inicial')
+plt.ylabel('Índice S80/S20')
+plt.xlabel('Ingreso inicial')
+plt.scatter(run_model_data.ingreso_inicial, run_model_data["S80/S20"])
+plt.show()
+
+plt.title('Índice S80/S20 ante cambios en el costo de vida')
+plt.ylabel('Índice S80/S20')
+plt.xlabel('Costo de vida')
+plt.scatter(run_model_data.costo_vida, run_model_data["S80/S20"])
+plt.show()
+
+plt.title('Índice S80/S20 ante cambios en el impuesto al ingreso')
+plt.ylabel('Índice S80/S20')
+plt.xlabel('Impuesto al ingreso')
+plt.scatter(run_model_data.impuesto_ingreso, run_model_data["S80/S20"])
+plt.show()
+
+run_agent_data = batch_run.get_agent_vars_dataframe()
+run_agent_data.head()
+print(run_agent_data.head())
+plt.xlabel('Iteración')
+plt.ylabel('Distribución de los ingresos')
+plt.scatter(run_agent_data.Run, run_agent_data["Ingreso total"])
+plt.show()
