@@ -20,12 +20,18 @@ def compute_gini(model):
 
 def compute_s80_s20(model):
     ingresos_tot = [agent.ingreso_total for agent in model.schedule.agents]
-    s80 = np.percentile(ingresos_tot, 80)
-    s20 = np.percentile(ingresos_tot, 20)
+    s80 = 0
+    s20 = 0
+    
+    if (not np.isnan(np.percentile(ingresos_tot, 80))):
+        s80 = np.percentile(ingresos_tot, 80)
+    
+    if (not np.isnan(np.percentile(ingresos_tot, 20))):
+        s20 = np.percentile(ingresos_tot, 20)
 
     if s20 != 0:
         s80_s20 = np.round(s80 / s20, 2)
     else:
-        s80_s20 = np.round(s80 / 0.0000001, 2)
+        s80_s20 = 0
 
     return s80_s20

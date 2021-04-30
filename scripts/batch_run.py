@@ -10,13 +10,13 @@ rng = default_rng()
 
 fixed_params = {
     "J": 0,
-    "I": 300,
+    "I": 100,
 }
 
 variable_params = {
-    "impuesto_ingreso": np.round(rng.uniform(0, 1, 5), 2),
-    "costo_vida": rng.integers(30, 500, 5),
-    "ingreso_inicial": rng.integers(0, 1000, 5)
+    "impuesto_ingreso": np.round(rng.uniform(0, 1, 10), 2),
+    "costo_vida": rng.integers(30, 500, 10),
+    "ingreso_inicial": rng.integers(0, 1000, 10)
 }
 
 model_reporters={
@@ -37,7 +37,7 @@ batch_run = BatchRunner(
     variable_params,
     fixed_params,
     iterations=5,
-    max_steps=70,
+    max_steps=100,
     model_reporters=model_reporters,
     agent_reporters=agent_reporters
 )
@@ -100,6 +100,7 @@ plt.show()
 run_agent_data = batch_run.get_agent_vars_dataframe()
 run_agent_data.head()
 print(run_agent_data.head())
+plt.title('Distribución de los ingresos a lo largo del tiempo')
 plt.xlabel('Iteración')
 plt.ylabel('Distribución de los ingresos')
 plt.scatter(run_agent_data.Run, run_agent_data["Ingreso total"])

@@ -49,8 +49,6 @@ model_params = {
     )
 }
 
-print(model_params)
-
 chartGini = ChartModule([{"Label": "Gini",
                       "Color": "#18496D"},],
                     data_collector_name='datacollector')
@@ -61,6 +59,13 @@ chartGiniS80S20 = ChartModule([{"Label": "Gini",
                       "Color": "#A43DC6"}],
                     data_collector_name='datacollector')
 
-server = ModularServer(EconomiaSocialista, [chartGini, chartGiniS80S20], "Economia Socialista", model_params)
+agent_bar = BarChartModule(
+    fields=[{"Label": "Ingreso total", "Color": "#4CCE59"}],
+    scope="agent",
+    sorting="ascending",
+    sort_by="ingreso_total",
+)
+
+server = ModularServer(EconomiaSocialista, [chartGini, chartGiniS80S20, agent_bar], "Economia socialista", model_params)
 server.port = 8521 # The default
 server.launch()
