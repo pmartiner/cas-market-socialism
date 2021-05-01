@@ -34,8 +34,8 @@ model_params = {
         name="Costo de vivir en la economía",
         value=10,
         min_value=0,
-        max_value=100,
-        step=1,
+        max_value=5000,
+        step=50,
         description="Costo de vivir en la economía",
     ),
     "ingreso_inicial": UserSettableParameter(
@@ -43,7 +43,7 @@ model_params = {
         name="Ingreso inicial en la economía",
         value=0,
         min_value=0,
-        max_value=1000,
+        max_value=5000,
         step=50,
         description="Ingreso inicial en la economía",
     )
@@ -59,6 +59,14 @@ chartGiniS80S20 = ChartModule([{"Label": "Gini",
                       "Color": "#A43DC6"}],
                     data_collector_name='datacollector')
 
+chartConsumidores = ChartModule([{"Label": "Gini",
+                      "Color": "#18496D"},
+                      {"Label": "S80/S20",
+                      "Color": "#A43DC6"},
+                      {"Label": "Consumidores",
+                      "Color": "#993599"}],
+                    data_collector_name='datacollector')
+
 agent_bar = BarChartModule(
     fields=[{"Label": "Ingreso total", "Color": "#4CCE59"}],
     scope="agent",
@@ -66,6 +74,8 @@ agent_bar = BarChartModule(
     sort_by="ingreso_total",
 )
 
-server = ModularServer(EconomiaSocialista, [chartGini, chartGiniS80S20, agent_bar], "Economia socialista", model_params)
+
+
+server = ModularServer(EconomiaSocialista, [chartGini, chartGiniS80S20, chartConsumidores, agent_bar], "Economia socialista", model_params)
 server.port = 8521 # The default
 server.launch()

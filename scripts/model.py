@@ -18,7 +18,7 @@ class Consumidore(Agent):
         # Dotaciones iniciales
         # self.theta = 1 / num_empresas
         self.oferta_trabajo_inicial = np.round(rng.uniform(), 2)
-        self.ingreso_inicial = ingreso_inicial
+        self.ingreso_inicial = np.round(rng.uniform(0, ingreso_inicial), 2)
         self.oferta_trabajo_disponible = self.oferta_trabajo_inicial
         self.ingreso_total = self.ingreso_inicial
         self.ingreso_disponible = self.ingreso_inicial
@@ -43,7 +43,7 @@ class Consumidore(Agent):
     def vive(self):
         self.ingreso_disponible -= self.model.costo_vida
     
-    def jubila(self):
+    def muere(self):
         self.model.schedule.remove(self)
 
     # Considerar la reprodución (que equivaldrá a que alguien ingresa al mercado laboral)
@@ -91,15 +91,14 @@ class Consumidore(Agent):
         self.demanda_trabajo_disponible = np.round(default_rng().uniform(0, 5), 2)
 
     def step(self):
-        # Si los ingresos del consumidore son menores a los costos de vivir, se jubila
+        self.vive()
+        self.trabaja()
+        self.paga_impuestos()
+        self.consume()
+        self.descansa()
+
         if self.ingreso_disponible < self.model.costo_vida:
-            self.jubila()
-        else:
-            self.vive()
-            self.trabaja()
-            self.paga_impuestos()
-            self.consume()
-            self.descansa()
+            self.muere()
 
 class Empresa(Agent):
     ''' An agent with fixed initial wealth.'''
@@ -162,10 +161,13 @@ class EconomiaSocialista(Model):
         self.datacollector = DataCollector(
             model_reporters={
                 "Gini": compute_gini,
-                "S80/S20": compute_s80_s20
+                "S80/S20": compute_s80_s20,
+                "Consumidores": lambda x: len(x.schedule.agents)
             },  # `compute_gini` defined above
             agent_reporters={"Ingreso total": lambda x: x.ingreso_total}
         )
+
+        self.datacollector.collect(self)
 
     def entrada_mercado_laboral(self):
         nueves_consumidores = self.num_consumidores - len(self.schedule.agents)
@@ -177,7 +179,7 @@ class EconomiaSocialista(Model):
 
     def step(self):
         '''Advance the model by one step.'''
-        
-        self.entrada_mercado_laboral()
+
         self.datacollector.collect(self)
+        self.entrada_mercado_laboral()
         self.schedule.step(by_breed=False)

@@ -9,7 +9,7 @@ from model_data_collection import *
 rng = default_rng()
 
 fixed_params = {
-    "J": 0,
+    "J": 1,
     "I": 100,
 }
 
@@ -28,8 +28,6 @@ agent_reporters={
     "Ingreso total": "ingreso_total"
 }
 
-print(variable_params)
-
 # The variables parameters will be invoke along with the fixed parameters allowing for either or both to be honored.
 # The BatchRunner won’t collect the data every step of the model, but only at the end of each run.
 batch_run = BatchRunner(
@@ -45,8 +43,7 @@ batch_run = BatchRunner(
 batch_run.run_all()
 
 run_model_data = batch_run.get_model_vars_dataframe()
-run_model_data.head()
-print(run_model_data.head())
+
 # Gini
 plt.title('Coeficiente de Gini por iteración')
 plt.ylabel('Coeficiente de Gini')
@@ -98,8 +95,7 @@ plt.scatter(run_model_data.impuesto_ingreso, run_model_data["S80/S20"])
 plt.show()
 
 run_agent_data = batch_run.get_agent_vars_dataframe()
-run_agent_data.head()
-print(run_agent_data.head())
+
 plt.title('Distribución de los ingresos a lo largo del tiempo')
 plt.xlabel('Iteración')
 plt.ylabel('Distribución de los ingresos')
