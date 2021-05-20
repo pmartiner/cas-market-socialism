@@ -5,7 +5,7 @@ from numpy.random import default_rng
 from mesa.batchrunner import BatchRunnerMP
 
 from model import EconomiaSocialista
-from model_data_collection import *
+from model_data_collection import compute_gini, compute_s80_s20
 
 rng = default_rng()
 
@@ -29,7 +29,7 @@ agent_reporters={
     "Ingreso total": "ingreso_total"
 }
 
-CPU_COUNT = int(multiprocessing.cpu_count()/2)
+CPU_COUNT = int(multiprocessing.cpu_count()/2) + 2
 
 # The variables parameters will be invoke along with the fixed parameters allowing for either or both to be honored.
 # The BatchRunner won’t collect the data every step of the model, but only at the end of each run.
@@ -53,7 +53,7 @@ run_model_data = batch_run.get_model_vars_dataframe()
 plt.title('Coeficiente de Gini por iteración')
 plt.ylabel('Coeficiente de Gini')
 plt.xlabel('Iteración')
-plt.scatter(run_model_data.Run, run_model_data.Gini)
+plt.scatter(run_model_data.index.array, run_model_data.Gini)
 plt.show()
 
 plt.title('Coeficiente de Gini ante cambios en el ingreso inicial')
@@ -78,7 +78,7 @@ plt.show()
 plt.title('Índice S80/S20 por iteración')
 plt.ylabel('Índice S80/S20')
 plt.xlabel('Iteración')
-plt.scatter(run_model_data.Run, run_model_data["S80/S20"])
+plt.scatter(run_model_data.index.array, run_model_data["S80/S20"])
 plt.show()
 
 plt.title('Índice S80/S20 ante cambios en el ingreso inicial')
@@ -104,5 +104,5 @@ run_agent_data = batch_run.get_agent_vars_dataframe()
 plt.title('Distribución de los ingresos a lo largo del tiempo')
 plt.xlabel('Iteración')
 plt.ylabel('Distribución de los ingresos')
-plt.scatter(run_agent_data.Run, run_agent_data["Ingreso total"])
+plt.scatter(run_model_data.index.array, run_agent_data["Ingreso total"])
 plt.show()
