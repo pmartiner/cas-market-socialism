@@ -33,3 +33,6 @@ def compute_s80_s20(model):
             s80_s20 = 0
 
         return s80_s20
+
+def get_consumidores(model):
+    return len(model.schedule.agents)

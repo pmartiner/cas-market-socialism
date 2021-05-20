@@ -162,9 +162,9 @@ class EconomiaSocialista(Model):
             model_reporters={
                 "Gini": compute_gini,
                 "S80/S20": compute_s80_s20,
-                "Consumidores": lambda x: len(x.schedule.agents)
+                "Consumidores": get_consumidores
             },  # `compute_gini` defined above
-            agent_reporters={"Ingreso total": lambda x: x.ingreso_total}
+            agent_reporters={"Ingreso total": 'ingreso_total'}
         )
 
         self.datacollector.collect(self)

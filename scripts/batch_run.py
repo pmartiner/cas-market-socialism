@@ -1,7 +1,8 @@
+import multiprocessing
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.random import default_rng
-from mesa.batchrunner import BatchRunner
+from mesa.batchrunner import BatchRunnerMP
 
 from model import EconomiaSocialista
 from model_data_collection import *
@@ -28,16 +29,20 @@ agent_reporters={
     "Ingreso total": "ingreso_total"
 }
 
+CPU_COUNT = int(multiprocessing.cpu_count()/2)
+
 # The variables parameters will be invoke along with the fixed parameters allowing for either or both to be honored.
 # The BatchRunner won’t collect the data every step of the model, but only at the end of each run.
-batch_run = BatchRunner(
-    EconomiaSocialista,
-    variable_params,
-    fixed_params,
+batch_run = BatchRunnerMP(
+    model_cls=EconomiaSocialista,
+    nr_processes=CPU_COUNT,
+    variable_parameters=variable_params,
+    fixed_parameters=fixed_params,
     iterations=5,
     max_steps=100,
     model_reporters=model_reporters,
-    agent_reporters=agent_reporters
+    agent_reporters=agent_reporters,
+    display_progress=True
 )
 
 batch_run.run_all()
